@@ -39,7 +39,7 @@ export async function validateEmailDomain(email) {
   if (BLOCKED_DOMAINS.has(domain)) {
     return {
       valid: false,
-      reason: "Please use a permanent email address.",
+      reason: "Please use a valid email address.",
     };
   }
 
