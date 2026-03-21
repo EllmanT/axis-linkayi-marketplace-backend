@@ -83,6 +83,10 @@ export const sendWelcome = async (req, res) => {
       positionInQueue: parsed.data.positionInQueue,
       referralCode: parsed.data.referralCode,
       baseUrl: parsed.data.baseUrl,
+      role: parsed.data.role,
+      primaryUse: parsed.data.primaryUse,
+      companyName: parsed.data.companyName,
+      isEmployee: parsed.data.isEmployee,
     });
     console.log(
       `[email.controller] sendWelcome email dispatch success email=${parsed.data.email}`
