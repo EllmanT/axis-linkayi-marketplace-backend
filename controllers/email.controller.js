@@ -5,7 +5,16 @@ import {
   sendReferralEmail,
   sendContactTeamEmail,
   sendContactUserEmail,
+  sendUpdateConfirmationEmail,
 } from "../services/emailSender.service.js";
+
+function maskEmail(email = "") {
+  const [local = "", domain = ""] = String(email).split("@");
+  if (!domain) return "***";
+  const maskedLocal =
+    local.length <= 2 ? `${local[0] || "*"}*` : `${local.slice(0, 2)}***`;
+  return `${maskedLocal}@${domain}`;
+}
 
 const validateEmailSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -39,6 +48,15 @@ const sendContactTeamSchema = z.object({
 
 const sendContactUserSchema = z.object({
   email: z.string().email(),
+});
+
+const sendUpdateConfirmationSchema = z.object({
+  email: z.string().email(),
+  positionInQueue: z.number().int().positive(),
+  referralCode: z.string().min(1),
+  baseUrl: z.string().url(),
+  role: z.string().optional(),
+  companyName: z.string().optional(),
 });
 
 export const validateEmail = async (req, res) => {
@@ -76,7 +94,7 @@ export const validateEmail = async (req, res) => {
 export const sendWelcome = async (req, res) => {
   try {
     console.log(
-      `[email.controller] sendWelcome request received email=${req.body?.email || "missing"} baseUrl=${req.body?.baseUrl || "missing"}`
+      `[email.controller] sendWelcome request received email=${maskEmail(req.body?.email || "")} baseUrl=${req.body?.baseUrl || "missing"}`
     );
     const parsed = sendWelcomeEmailSchema.safeParse(req.body);
 
@@ -102,7 +120,7 @@ export const sendWelcome = async (req, res) => {
       isEmployee: parsed.data.isEmployee,
     });
     console.log(
-      `[email.controller] sendWelcome email dispatch success email=${parsed.data.email}`
+      `[email.controller] sendWelcome email dispatch success email=${maskEmail(parsed.data.email)}`
     );
 
     return res.status(200).json({
@@ -124,7 +142,7 @@ export const sendWelcome = async (req, res) => {
 export const sendReferral = async (req, res) => {
   try {
     console.log(
-      `[email.controller] sendReferral request received email=${req.body?.email || "missing"} baseUrl=${req.body?.baseUrl || "missing"}`
+      `[email.controller] sendReferral request received email=${maskEmail(req.body?.email || "")} baseUrl=${req.body?.baseUrl || "missing"}`
     );
     const parsed = sendReferralEmailSchema.safeParse(req.body);
 
@@ -147,7 +165,7 @@ export const sendReferral = async (req, res) => {
       baseUrl: parsed.data.baseUrl,
     });
     console.log(
-      `[email.controller] sendReferral email dispatch success email=${parsed.data.email}`
+      `[email.controller] sendReferral email dispatch success email=${maskEmail(parsed.data.email)}`
     );
 
     return res.status(200).json({
@@ -224,6 +242,46 @@ export const sendContactUser = async (req, res) => {
       success: false,
       statusCode: 500,
       error: "Failed to send contact confirmation email",
+    });
+  }
+};
+
+export const sendUpdateConfirmation = async (req, res) => {
+  try {
+    console.log(
+      `[email.controller] sendUpdateConfirmation request received email=${maskEmail(req.body?.email || "")}`
+    );
+    const parsed = sendUpdateConfirmationSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: parsed.error.issues[0]?.message || "Invalid request body",
+      });
+    }
+
+    await sendUpdateConfirmationEmail({
+      to: parsed.data.email,
+      positionInQueue: parsed.data.positionInQueue,
+      referralCode: parsed.data.referralCode,
+      baseUrl: parsed.data.baseUrl,
+      role: parsed.data.role,
+      companyName: parsed.data.companyName,
+    });
+
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Update confirmation email sent successfully",
+      data: {},
+    });
+  } catch (error) {
+    console.error("[email.controller] sendUpdateConfirmation error:", error);
+    return res.status(500).json({
+      success: false,
+      statusCode: 500,
+      error: "Failed to send update confirmation email",
     });
   }
 };

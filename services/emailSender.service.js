@@ -362,3 +362,117 @@ export async function sendContactUserEmail({ to }) {
     `[emailSender] Contact confirmation email sent successfully to=${masked}`
   );
 }
+
+export async function sendUpdateConfirmationEmail({
+  to,
+  positionInQueue,
+  referralCode,
+  baseUrl,
+  role,
+  companyName,
+}) {
+  const referralLink = `${baseUrl}?ref=${referralCode}`;
+  const masked = maskEmail(to);
+
+  console.log(
+    `[emailSender] Sending update confirmation to=${masked} position=${positionInQueue}`
+  );
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Your details have been updated</title>
+    </head>
+    <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,
+                 sans-serif;background:#f9fafb;margin:0;padding:24px;">
+      <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;
+                  overflow:hidden;border:1px solid #e5e7eb;">
+
+        <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);
+                    padding:28px 32px;text-align:center;">
+          <h1 style="color:white;margin:0;font-size:22px;line-height:1.3;">
+            Your waitlist details have been updated
+          </h1>
+        </div>
+
+        <div style="padding:32px;">
+          <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 20px;">
+            We have updated your information on the Axis Marketplace waitlist.
+            Your position in the queue has not changed.
+          </p>
+
+          <!-- Position badge -->
+          <div style="background:#fef2f2;border:2px solid #fecaca;padding:20px;
+                      border-radius:12px;margin:0 0 24px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:13px;color:#6b7280;">
+              Your current position
+            </p>
+            <p style="margin:0;font-size:32px;font-weight:700;color:#dc2626;">
+              #${positionInQueue}
+            </p>
+            <p style="margin:8px 0 0;font-size:13px;color:#4b5563;">
+              Refer others to move up the queue faster.
+            </p>
+          </div>
+
+          <!-- Updated details -->
+          ${
+            (role && role.trim()) || (companyName && companyName.trim())
+              ? `<div style="background:#f9fafb;border:1px solid #e5e7eb;
+                            border-radius:8px;padding:16px 20px;margin:0 0 24px;">
+                  <p style="margin:0 0 10px;font-weight:600;color:#111827;font-size:13px;">
+                    Updated details on file:
+                  </p>
+                  ${companyName ? `<p style="margin:0 0 4px;font-size:13px;color:#4b5563;">
+                    Company: <strong>${companyName}</strong></p>` : ""}
+                  ${role ? `<p style="margin:0;font-size:13px;color:#4b5563;">
+                    Role: <strong>${role}</strong></p>` : ""}
+                </div>`
+              : ""
+          }
+
+          <!-- Referral link -->
+          <p style="font-size:14px;color:#374151;margin:0 0 10px;font-weight:600;">
+            Your referral link
+          </p>
+          <div style="background:#f3f4f6;padding:14px;border-radius:8px;
+                      font-size:13px;word-break:break-all;margin:0 0 20px;">
+            <a href="${referralLink}"
+               style="color:#dc2626;font-weight:600;text-decoration:none;">
+              ${referralLink}
+            </a>
+          </div>
+
+          <div style="text-align:center;">
+            <a href="${referralLink}"
+               style="display:inline-block;background:#dc2626;color:white;
+                      padding:12px 28px;border-radius:8px;text-decoration:none;
+                      font-weight:600;font-size:14px;">
+              Share your link
+            </a>
+          </div>
+        </div>
+
+        <div style="background:#f9fafb;padding:20px;text-align:center;
+                    font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;">
+          <p style="margin:0;">© ${new Date().getFullYear()} Axis Marketplace</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
+    to,
+    subject: "Your Axis Marketplace waitlist details have been updated",
+    html,
+  });
+
+  console.log(
+    `[emailSender] Update confirmation email sent successfully to=${masked}`
+  );
+}

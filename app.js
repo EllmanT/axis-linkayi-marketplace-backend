@@ -1,11 +1,27 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import emailRouter from "./routes/email.route.js";
 import { PORT } from "./config/env.js";
 
 const app = express();
+
+// Global rate limiter — applies to all routes
+// This is a second layer of defence even if someone has the secret
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    statusCode: 429,
+    error: "Too many requests. Please try again later.",
+  },
+  skip: (req) => req.path === "/",
+});
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -31,6 +47,8 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.set("trust proxy", 1);
+app.use(globalLimiter);
 
 app.use((req, res, next) => {
   const start = Date.now();
