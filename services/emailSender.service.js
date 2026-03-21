@@ -1,5 +1,9 @@
 import transporter from "../config/mailer.js";
-import { EMAIL_FROM_ADDRESS, EMAIL_FROM_NAME } from "../config/env.js";
+import {
+  EMAIL_FROM_ADDRESS,
+  EMAIL_FROM_NAME,
+  CONTACT_TEAM_EMAIL,
+} from "../config/env.js";
 
 function getPersonalizedContent(role) {
   const normalized = (role || "").toLowerCase();
@@ -120,10 +124,17 @@ export async function sendWelcomeEmail({
             <a href="${referralLink}" style="display:inline-block; background:#dc2626; color:white; padding:14px 32px; border-radius:10px; font-weight:600; font-size:15px; text-decoration:none;">Share my link</a>
           </div>
           ${
-            companyName
-              ? `<div style="background:#f9fafb; padding:16px; border-radius:8px; margin:0;">
-                  <p style="margin:0 0 8px; font-weight:600; color:#111827; font-size:13px;">Your details:</p>
-                  <p style="margin:0; font-size:13px; color:#4b5563;">${companyName}${role ? ` - ${role}` : ""}${primaryUse ? ` - ${primaryUse}` : ""}${typeof isEmployee === "boolean" ? ` - employee=${isEmployee}` : ""}</p>
+            companyName && companyName !== "Not provided" && companyName.trim() !== ""
+              ? `<div style="background:#f9fafb;padding:16px;border-radius:8px;margin:24px 0 0;">
+                  <p style="margin:0 0 8px;font-weight:600;color:#111827;font-size:13px;">
+                    Your details:
+                  </p>
+                  <p style="margin:0;font-size:13px;color:#4b5563;line-height:1.6;">
+                    ${companyName}
+                    ${role ? `<br/><span style="color:#6b7280;">Role: ${role}</span>` : ""}
+                    ${primaryUse ? `<br/><span style="color:#6b7280;">Primary use: ${primaryUse}</span>` : ""}
+                    ${typeof isEmployee === "boolean" ? `<br/><span style="color:#6b7280;">Employee: ${isEmployee ? "Yes" : "No"}</span>` : ""}
+                  </p>
                 </div>`
               : ""
           }
@@ -203,4 +214,151 @@ export async function sendReferralEmail({
   });
 
   console.log(`[emailSender] Referral email sent successfully to=${masked}`);
+}
+
+export async function sendContactTeamEmail({
+  email,
+  mobile,
+  preferredContact,
+  pageUrl,
+}) {
+  const teamEmail =
+    CONTACT_TEAM_EMAIL || EMAIL_FROM_ADDRESS || "waitlist@axissol.com";
+
+  console.log(
+    `[emailSender] Sending contact team notification to=${maskEmail(teamEmail)}`
+  );
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"><title>New Contact Request</title></head>
+    <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+                 line-height:1.6;color:#111827;max-width:600px;margin:0 auto;padding:24px;">
+      <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:24px 32px;">
+          <h1 style="color:white;margin:0;font-size:20px;">
+            New contact request - Axis Marketplace
+          </h1>
+        </div>
+        <div style="padding:32px;">
+          <p style="margin:0 0 20px;color:#4b5563;font-size:15px;">
+            A new enquiry has been submitted from the public landing page.
+          </p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:12px 8px;font-weight:600;color:#374151;width:160px;">
+                Preferred contact
+              </td>
+              <td style="padding:12px 8px;color:#111827;">
+                ${preferredContact}
+              </td>
+            </tr>
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:12px 8px;font-weight:600;color:#374151;">Email</td>
+              <td style="padding:12px 8px;color:#111827;">
+                ${email || "Not provided"}
+              </td>
+            </tr>
+            <tr style="border-bottom:1px solid #e5e7eb;">
+              <td style="padding:12px 8px;font-weight:600;color:#374151;">Mobile</td>
+              <td style="padding:12px 8px;color:#111827;">
+                ${mobile || "Not provided"}
+              </td>
+            </tr>
+            ${
+              pageUrl
+                ? `<tr>
+                <td style="padding:12px 8px;font-weight:600;color:#374151;">Page</td>
+                <td style="padding:12px 8px;">
+                  <a href="${pageUrl}" style="color:#dc2626;">${pageUrl}</a>
+                </td>
+              </tr>`
+                : ""
+            }
+          </table>
+        </div>
+        <div style="background:#f9fafb;padding:16px 32px;font-size:12px;color:#9ca3af;">
+          Sent automatically from Axis Marketplace website.
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
+    to: teamEmail,
+    subject: "New contact request - Axis Marketplace",
+    html,
+  });
+
+  console.log(`[emailSender] Contact team email sent successfully`);
+}
+
+export async function sendContactUserEmail({ to }) {
+  const masked = maskEmail(to);
+  console.log(`[emailSender] Sending contact confirmation to=${masked}`);
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>We've received your message</title>
+    </head>
+    <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+                 background:#f9fafb;margin:0;padding:24px;">
+      <div style="max-width:600px;margin:0 auto;background:white;border-radius:12px;
+                  border:1px solid #e5e7eb;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);
+                    padding:32px;text-align:center;">
+          <h1 style="color:white;margin:0;font-size:24px;">
+            We've received your message
+          </h1>
+        </div>
+        <div style="padding:32px;">
+          <p style="font-size:16px;color:#374151;line-height:1.6;margin:0 0 16px;">
+            Thanks for getting in touch with the Axis Marketplace team.
+          </p>
+          <p style="font-size:15px;color:#4b5563;line-height:1.6;margin:0 0 16px;">
+            We'll reach out shortly using your preferred contact method.
+            Whether you're joining as an employee, employer, vendor, or
+            financial partner - we're glad you're here.
+          </p>
+          <p style="font-size:15px;color:#4b5563;line-height:1.6;margin:0 0 24px;">
+            Our team is actively onboarding partners and shaping launch
+            access, so your enquiry directly helps us build this the right way.
+          </p>
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+                      padding:16px 20px;">
+            <p style="margin:0;font-size:14px;color:#374151;">
+              For urgent enquiries, email us directly at
+              <a href="mailto:info@axissol.com"
+                 style="color:#dc2626;font-weight:600;">
+                info@axissol.com
+              </a>
+            </p>
+          </div>
+        </div>
+        <div style="background:#f9fafb;padding:20px;text-align:center;
+                    font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;">
+          <p style="margin:0;">© ${new Date().getFullYear()} Axis Marketplace</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  await transporter.sendMail({
+    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
+    to,
+    subject: "We've received your message - Axis Marketplace",
+    html,
+  });
+
+  console.log(
+    `[emailSender] Contact confirmation email sent successfully to=${masked}`
+  );
 }

@@ -3,6 +3,8 @@ import { validateEmailDomain } from "../services/emailValidator.service.js";
 import {
   sendWelcomeEmail,
   sendReferralEmail,
+  sendContactTeamEmail,
+  sendContactUserEmail,
 } from "../services/emailSender.service.js";
 
 const validateEmailSchema = z.object({
@@ -26,6 +28,17 @@ const sendReferralEmailSchema = z.object({
   referralCount: z.number().int().min(0),
   referralCode: z.string().min(1),
   baseUrl: z.string().url(),
+});
+
+const sendContactTeamSchema = z.object({
+  email: z.string().email().optional(),
+  mobile: z.string().optional(),
+  preferredContact: z.enum(["email", "mobile"]),
+  pageUrl: z.string().optional(),
+});
+
+const sendContactUserSchema = z.object({
+  email: z.string().email(),
 });
 
 export const validateEmail = async (req, res) => {
@@ -149,6 +162,68 @@ export const sendReferral = async (req, res) => {
       success: false,
       statusCode: 500,
       error: "Failed to send referral email",
+    });
+  }
+};
+
+export const sendContactTeam = async (req, res) => {
+  try {
+    console.log("[email.controller] sendContactTeam request received");
+    const parsed = sendContactTeamSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: parsed.error.issues[0]?.message || "Invalid request body",
+      });
+    }
+
+    await sendContactTeamEmail(parsed.data);
+
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Contact team email sent successfully",
+      data: {},
+    });
+  } catch (error) {
+    console.error("[email.controller] sendContactTeam error:", error);
+    return res.status(500).json({
+      success: false,
+      statusCode: 500,
+      error: "Failed to send contact team email",
+    });
+  }
+};
+
+export const sendContactUser = async (req, res) => {
+  try {
+    console.log("[email.controller] sendContactUser request received");
+    const parsed = sendContactUserSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        statusCode: 400,
+        error: parsed.error.issues[0]?.message || "Invalid request body",
+      });
+    }
+
+    await sendContactUserEmail({ to: parsed.data.email });
+
+    return res.status(200).json({
+      success: true,
+      statusCode: 200,
+      message: "Contact confirmation email sent successfully",
+      data: {},
+    });
+  } catch (error) {
+    console.error("[email.controller] sendContactUser error:", error);
+    return res.status(500).json({
+      success: false,
+      statusCode: 500,
+      error: "Failed to send contact confirmation email",
     });
   }
 };
