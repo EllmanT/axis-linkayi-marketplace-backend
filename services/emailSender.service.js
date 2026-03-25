@@ -10,12 +10,11 @@ function getPersonalizedContent(role) {
 
   if (normalized.includes("vendor") || normalized.includes("supplier")) {
     return {
-      headline: "Start selling to 500,000+ employees on credit",
+      headline: "Start selling to 250,000+ employees on credit",
       value:
-        "Stop losing sales when customers don't have cash today. With Axis, verify their EC number in real time, they walk out with your product, and you get paid automatically from their salary. Zero paperwork. Zero risk. 100% payment guarantee.",
+        "Stop losing sales when customers don't have cash today. With Linkayi, verify their EC number in real time, they walk out with your product, and you get paid automatically from their salary. Zero paperwork. Zero risk. 100% payment guarantee.",
       shareWhy: "Share with other vendors in your area",
-      shareReason:
-        "The more vendors join, the faster we launch. Early vendors get zero setup fees and 60 days ahead of competitors.",
+        "The more vendors join , the faster we launch. Early vendors get zero setup fees and 60 days ahead of competitors.",
       topBenefit: "Guaranteed payment via automatic deductions",
     };
   }
@@ -45,9 +44,9 @@ function getPersonalizedContent(role) {
   }
 
   return {
-    headline: "You're part of the Axis Marketplace waitlist",
+    headline: "You're part of the Linkayi waitlist",
     value:
-      "Axis makes salary-based payments simple: vendors sell on credit, employees buy now and pay later, and everyone gets paid automatically through deductions.",
+      "Linkayi makes salary-based payments simple: vendors sell on credit, employees buy now and pay later, and everyone gets paid automatically through deductions.",
     shareWhy: "Share with your network",
     shareReason:
       "Every person who joins helps us launch faster with better features for everyone.",
@@ -88,13 +87,13 @@ export async function sendWelcomeEmail({
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Welcome to Axis Marketplace</title>
+      <title>Welcome to Linkayi</title>
     </head>
     <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; background:#f9fafb; margin:0; padding:24px;">
       <div style="max-width:600px; margin:0 auto; background:white; border-radius:12px; overflow:hidden; border:1px solid #e5e7eb;">
         <div style="background:linear-gradient(135deg,#dc2626,#b91c1c); padding:32px; text-align:center;">
           <div style="margin-bottom:10px; color:white; font-weight:700; letter-spacing:0.4px; font-size:12px;">
-            Axis Marketplace - Private waitlist
+            Linkayi - Private waitlist
           </div>
           <h1 style="color:white; margin:0; font-size:24px; line-height:1.3;">
             ${content.headline}
@@ -140,7 +139,7 @@ export async function sendWelcomeEmail({
           }
         </div>
         <div style="background:#f9fafb; padding:20px; text-align:center; font-size:12px; color:#9ca3af; border-top:1px solid #e5e7eb;">
-          <p style="margin:0;">© ${new Date().getFullYear()} Axis Marketplace</p>
+          <p style="margin:0;">© ${new Date().getFullYear()} Linkayi</p>
         </div>
       </div>
     </body>
@@ -199,7 +198,7 @@ export async function sendReferralEmail({
           </div>
         </div>
         <div style="background:#f9fafb; padding:16px; text-align:center; font-size:12px; color:#9ca3af;">
-          © ${new Date().getFullYear()} Axis Marketplace
+          © ${new Date().getFullYear()} Linkayi
         </div>
       </div>
     </body>
@@ -238,7 +237,7 @@ export async function sendContactTeamEmail({
       <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
         <div style="background:linear-gradient(135deg,#dc2626,#b91c1c);padding:24px 32px;">
           <h1 style="color:white;margin:0;font-size:20px;">
-            New contact request - Axis Marketplace
+            New contact request - Linkayi
           </h1>
         </div>
         <div style="padding:32px;">
@@ -279,7 +278,7 @@ export async function sendContactTeamEmail({
           </table>
         </div>
         <div style="background:#f9fafb;padding:16px 32px;font-size:12px;color:#9ca3af;">
-          Sent automatically from Axis Marketplace website.
+          Sent automatically from Linkayi website.
         </div>
       </div>
     </body>
@@ -289,7 +288,7 @@ export async function sendContactTeamEmail({
   await transporter.sendMail({
     from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
     to: teamEmail,
-    subject: "New contact request - Axis Marketplace",
+    subject: "New contact request - Linkayi",
     html,
   });
 
@@ -320,7 +319,7 @@ export async function sendContactUserEmail({ to }) {
         </div>
         <div style="padding:32px;">
           <p style="font-size:16px;color:#374151;line-height:1.6;margin:0 0 16px;">
-            Thanks for getting in touch with the Axis Marketplace team.
+            Thanks for getting in touch with the Linkayi team.
           </p>
           <p style="font-size:15px;color:#4b5563;line-height:1.6;margin:0 0 16px;">
             We'll reach out shortly using your preferred contact method.
@@ -344,7 +343,7 @@ export async function sendContactUserEmail({ to }) {
         </div>
         <div style="background:#f9fafb;padding:20px;text-align:center;
                     font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;">
-          <p style="margin:0;">© ${new Date().getFullYear()} Axis Marketplace</p>
+          <p style="margin:0;">© ${new Date().getFullYear()} Linkayi</p>
         </div>
       </div>
     </body>
@@ -354,7 +353,7 @@ export async function sendContactUserEmail({ to }) {
   await transporter.sendMail({
     from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
     to,
-    subject: "We've received your message - Axis Marketplace",
+    subject: "We've received your message - Linkayi",
     html,
   });
 
@@ -400,7 +399,7 @@ export async function sendUpdateConfirmationEmail({
 
         <div style="padding:32px;">
           <p style="font-size:15px;color:#374151;line-height:1.6;margin:0 0 20px;">
-            We have updated your information on the Axis Marketplace waitlist.
+            We have updated your information on the Linkayi waitlist.
             Your position in the queue has not changed.
           </p>
 
@@ -458,7 +457,7 @@ export async function sendUpdateConfirmationEmail({
 
         <div style="background:#f9fafb;padding:20px;text-align:center;
                     font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;">
-          <p style="margin:0;">© ${new Date().getFullYear()} Axis Marketplace</p>
+          <p style="margin:0;">© ${new Date().getFullYear()} Linkayi</p>
         </div>
       </div>
     </body>
@@ -468,7 +467,7 @@ export async function sendUpdateConfirmationEmail({
   await transporter.sendMail({
     from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
     to,
-    subject: "Your Axis Marketplace waitlist details have been updated",
+    subject: "Your Linkayi waitlist details have been updated",
     html,
   });
 

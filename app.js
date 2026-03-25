@@ -27,8 +27,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3005",
   "http://localhost:4200",
-  "https://axis.marketplace",
-  "https://www.axis.marketplace",
+  "https://linkayi.marketplace",
+  "https://www.linkayi.marketplace",
 ];
 
 app.use(
