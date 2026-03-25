@@ -3,6 +3,9 @@ import {
   EMAIL_FROM_ADDRESS,
   EMAIL_FROM_NAME,
   CONTACT_TEAM_EMAIL,
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_USERNAME,
 } from "../config/env.js";
 
 function getPersonalizedContent(role) {
@@ -14,6 +17,7 @@ function getPersonalizedContent(role) {
       value:
         "Stop losing sales when customers don't have cash today. With Linkayi, verify their EC number in real time, they walk out with your product, and you get paid automatically from their salary. Zero paperwork. Zero risk. 100% payment guarantee.",
       shareWhy: "Share with other vendors in your area",
+      shareReason:
         "The more vendors join , the faster we launch. Early vendors get zero setup fees and 60 days ahead of competitors.",
       topBenefit: "Guaranteed payment via automatic deductions",
     };
@@ -59,6 +63,15 @@ function maskEmail(email) {
   const maskedLocal =
     local.length <= 2 ? `${local[0] || "*"}*` : `${local.slice(0, 2)}***`;
   return `${maskedLocal}@${domain}`;
+}
+
+function createAttemptId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 8)}`;
+}
+
+function smtpForLogs() {
+  const userMasked = SMTP_USERNAME ? maskEmail(SMTP_USERNAME) : "unknown";
+  return `smtp=${SMTP_HOST || "unknown"}:${SMTP_PORT || "unknown"} user=${userMasked}`;
 }
 
 export async function sendWelcomeEmail({
@@ -146,14 +159,40 @@ export async function sendWelcomeEmail({
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
-    to,
-    subject: "You're on the Linkayi waitlist!",
-    html,
-  });
+  const attemptId = createAttemptId();
+  const from = `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`;
 
-  console.log(`[emailSender] Welcome email sent successfully to=${masked}`);
+  console.log(
+    `[emailSender] [welcome] attempt=${attemptId} to=${masked} from=${maskEmail(
+      EMAIL_FROM_ADDRESS
+    )} subject="You're on the Linkayi waitlist!" ${smtpForLogs()}`
+  );
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject: "You're on the Linkayi waitlist!",
+      html,
+    });
+
+    console.log(
+      `[emailSender] [welcome] success attempt=${attemptId} to=${masked} messageId=${
+        info?.messageId || "n/a"
+      } accepted=${(info?.accepted || []).length} rejected=${(info?.rejected || []).length} response=${
+        info?.response || "n/a"
+      }`
+    );
+  } catch (error) {
+    console.error(
+      `[emailSender] [welcome] failed attempt=${attemptId} to=${masked} error=${
+        error?.message || error
+      } code=${error?.code || "n/a"} command=${error?.command || "n/a"} response=${
+        error?.response || "n/a"
+      } ${smtpForLogs()}`
+    );
+    throw error;
+  }
 }
 
 export async function sendReferralEmail({
@@ -205,14 +244,40 @@ export async function sendReferralEmail({
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
-    to,
-    subject: "Someone joined Linkayi using your referral link!",
-    html,
-  });
+  const attemptId = createAttemptId();
+  const from = `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`;
 
-  console.log(`[emailSender] Referral email sent successfully to=${masked}`);
+  console.log(
+    `[emailSender] [referral] attempt=${attemptId} to=${masked} from=${maskEmail(
+      EMAIL_FROM_ADDRESS
+    )} subject="Someone joined Linkayi using your referral link!" ${smtpForLogs()}`
+  );
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject: "Someone joined Linkayi using your referral link!",
+      html,
+    });
+
+    console.log(
+      `[emailSender] [referral] success attempt=${attemptId} to=${masked} messageId=${
+        info?.messageId || "n/a"
+      } accepted=${(info?.accepted || []).length} rejected=${(info?.rejected || []).length} response=${
+        info?.response || "n/a"
+      }`
+    );
+  } catch (error) {
+    console.error(
+      `[emailSender] [referral] failed attempt=${attemptId} to=${masked} error=${
+        error?.message || error
+      } code=${error?.code || "n/a"} command=${error?.command || "n/a"} response=${
+        error?.response || "n/a"
+      } ${smtpForLogs()}`
+    );
+    throw error;
+  }
 }
 
 export async function sendContactTeamEmail({
@@ -285,14 +350,42 @@ export async function sendContactTeamEmail({
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
-    to: teamEmail,
-    subject: "New contact request - Linkayi",
-    html,
-  });
+  const attemptId = createAttemptId();
+  const from = `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`;
 
-  console.log(`[emailSender] Contact team email sent successfully`);
+  console.log(
+    `[emailSender] [contact-team] attempt=${attemptId} to=${maskEmail(
+      teamEmail
+    )} from=${maskEmail(EMAIL_FROM_ADDRESS)} subject="New contact request - Linkayi" ${smtpForLogs()}`
+  );
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to: teamEmail,
+      subject: "New contact request - Linkayi",
+      html,
+    });
+
+    console.log(
+      `[emailSender] [contact-team] success attempt=${attemptId} to=${maskEmail(
+        teamEmail
+      )} messageId=${info?.messageId || "n/a"} accepted=${(
+        info?.accepted || []
+      ).length} rejected=${(info?.rejected || []).length} response=${
+        info?.response || "n/a"
+      }`
+    );
+  } catch (error) {
+    console.error(
+      `[emailSender] [contact-team] failed attempt=${attemptId} to=${maskEmail(
+        teamEmail
+      )} error=${error?.message || error} code=${error?.code || "n/a"} command=${
+        error?.command || "n/a"
+      } response=${error?.response || "n/a"} ${smtpForLogs()}`
+    );
+    throw error;
+  }
 }
 
 export async function sendContactUserEmail({ to }) {
@@ -350,16 +443,40 @@ export async function sendContactUserEmail({ to }) {
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
-    to,
-    subject: "We've received your message - Linkayi",
-    html,
-  });
+  const attemptId = createAttemptId();
+  const from = `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`;
 
   console.log(
-    `[emailSender] Contact confirmation email sent successfully to=${masked}`
+    `[emailSender] [contact-user] attempt=${attemptId} to=${masked} from=${maskEmail(
+      EMAIL_FROM_ADDRESS
+    )} subject="We've received your message - Linkayi" ${smtpForLogs()}`
   );
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject: "We've received your message - Linkayi",
+      html,
+    });
+
+    console.log(
+      `[emailSender] [contact-user] success attempt=${attemptId} to=${masked} messageId=${
+        info?.messageId || "n/a"
+      } accepted=${(info?.accepted || []).length} rejected=${(info?.rejected || []).length} response=${
+        info?.response || "n/a"
+      }`
+    );
+  } catch (error) {
+    console.error(
+      `[emailSender] [contact-user] failed attempt=${attemptId} to=${masked} error=${
+        error?.message || error
+      } code=${error?.code || "n/a"} command=${error?.command || "n/a"} response=${
+        error?.response || "n/a"
+      } ${smtpForLogs()}`
+    );
+    throw error;
+  }
 }
 
 export async function sendUpdateConfirmationEmail({
@@ -464,14 +581,38 @@ export async function sendUpdateConfirmationEmail({
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`,
-    to,
-    subject: "Your Linkayi waitlist details have been updated",
-    html,
-  });
+  const attemptId = createAttemptId();
+  const from = `${EMAIL_FROM_NAME} <${EMAIL_FROM_ADDRESS}>`;
 
   console.log(
-    `[emailSender] Update confirmation email sent successfully to=${masked}`
+    `[emailSender] [update-confirmation] attempt=${attemptId} to=${masked} from=${maskEmail(
+      EMAIL_FROM_ADDRESS
+    )} subject="Your Linkayi waitlist details have been updated" ${smtpForLogs()}`
   );
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject: "Your Linkayi waitlist details have been updated",
+      html,
+    });
+
+    console.log(
+      `[emailSender] [update-confirmation] success attempt=${attemptId} to=${masked} messageId=${
+        info?.messageId || "n/a"
+      } accepted=${(info?.accepted || []).length} rejected=${(info?.rejected || []).length} response=${
+        info?.response || "n/a"
+      }`
+    );
+  } catch (error) {
+    console.error(
+      `[emailSender] [update-confirmation] failed attempt=${attemptId} to=${masked} error=${
+        error?.message || error
+      } code=${error?.code || "n/a"} command=${error?.command || "n/a"} response=${
+        error?.response || "n/a"
+      } ${smtpForLogs()}`
+    );
+    throw error;
+  }
 }
