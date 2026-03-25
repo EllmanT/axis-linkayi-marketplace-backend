@@ -138,9 +138,7 @@ export async function sendWelcomeEmail({
           <div style="background:#f3f4f6; padding:16px; border-radius:8px; font-size:13px; word-break:break-all; margin:0 0 16px;">
             <a href="${referralLink}" style="color:#dc2626; font-weight:600; text-decoration:none;">${referralLink}</a>
           </div>
-          <div style="text-align:center; margin:0 0 28px;">
-            <a href="${referralLink}" style="display:inline-block; background:#dc2626; color:white; padding:14px 32px; border-radius:10px; font-weight:600; font-size:15px; text-decoration:none;">Share my link</a>
-          </div>
+          <p style="font-size:13px; color:#6b7280; margin:0 0 28px;">Copy and share this link.</p>
           ${
             companyName && companyName !== "Not provided" && companyName.trim() !== ""
               ? `<div style="background:#f9fafb;padding:16px;border-radius:8px;margin:24px 0 0;">
@@ -238,9 +236,7 @@ export async function sendReferralEmail({
           <div style="background:#f3f4f6; padding:14px; border-radius:8px; font-size:14px; word-break:break-all; margin:0 0 20px;">
             <a href="${referralLink}" style="color:#dc2626; font-weight:600; text-decoration:none;">${referralLink}</a>
           </div>
-          <div style="text-align:center;">
-            <a href="${referralLink}" style="display:inline-block; background:#dc2626; color:white; padding:14px 28px; border-radius:8px; text-decoration:none; font-weight:600;">Keep sharing</a>
-          </div>
+          <p style="font-size:13px; color:#6b7280; margin:0;">Copy and share this link.</p>
         </div>
         <div style="background:#f9fafb; padding:16px; text-align:center; font-size:12px; color:#9ca3af;">
           © ${new Date().getFullYear()} Linkayi
@@ -568,14 +564,9 @@ export async function sendUpdateConfirmationEmail({
             </a>
           </div>
 
-          <div style="text-align:center;">
-            <a href="${referralLink}"
-               style="display:inline-block;background:#dc2626;color:white;
-                      padding:12px 28px;border-radius:8px;text-decoration:none;
-                      font-weight:600;font-size:14px;">
-              Share your link
-            </a>
-          </div>
+          <p style="font-size:13px; color:#6b7280; margin:0;">
+            Copy and share this link.
+          </p>
         </div>
 
         <div style="background:#f9fafb;padding:20px;text-align:center;
