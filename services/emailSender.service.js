@@ -6,6 +6,7 @@ import {
   SMTP_HOST,
   SMTP_PORT,
   SMTP_USERNAME,
+  WELCOME_REFERRAL_BASE_URL,
 } from "../config/env.js";
 
 function getPersonalizedContent(role) {
@@ -84,7 +85,12 @@ export async function sendWelcomeEmail({
   companyName,
   isEmployee,
 }) {
-  const referralLink = `${baseUrl}?ref=${referralCode}`;
+  const referralBaseUrl = (
+    WELCOME_REFERRAL_BASE_URL && WELCOME_REFERRAL_BASE_URL.trim()
+      ? WELCOME_REFERRAL_BASE_URL
+      : baseUrl
+  ).replace(/\/+$/, "");
+  const referralLink = `${referralBaseUrl}?ref=${encodeURIComponent(referralCode)}`;
   const masked = maskEmail(to);
   const content = getPersonalizedContent(role);
   const isTopFifty = positionInQueue <= 50;

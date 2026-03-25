@@ -19,6 +19,7 @@ export const EMAIL_FROM_ADDRESS =
   process.env.SMTP_USERNAME ||
   process.env.GMAIL_USER;
 export const CONTACT_TEAM_EMAIL = process.env.CONTACT_TEAM_EMAIL;
+export const WELCOME_REFERRAL_BASE_URL = process.env.WELCOME_REFERRAL_BASE_URL;
 
 // Shared secret for backend-to-backend auth
 export const EMAIL_SERVICE_SECRET = process.env.EMAIL_SERVICE_SECRET;

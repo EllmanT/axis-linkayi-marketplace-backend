@@ -28,13 +28,62 @@ const BLOCKED_DOMAINS = new Set([
   "notreal.com",
 ]);
 
+const PLACEHOLDER_LOCAL_PARTS = new Set([
+  "test",
+  "testing",
+  "demo",
+  "sample",
+  "fake",
+  "admin",
+  "user",
+]);
+
+const PLACEHOLDER_DOMAIN_LABELS = new Set([
+  "test",
+  "testing",
+  "example",
+  "invalid",
+  "fake",
+  "placeholder",
+  "noreply",
+  "no-reply",
+  "mail",
+]);
+
+function isLikelyProviderTypo(domain) {
+  return /^(gmail|yahoo|hotmail|outlook)\d+\./.test(domain);
+}
+
 export async function validateEmailDomain(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return { valid: false, reason: "Invalid email format." };
   }
 
-  const domain = email.split("@")[1].toLowerCase();
+  const [localPart = "", rawDomain = ""] = email.toLowerCase().split("@");
+  const domain = rawDomain.toLowerCase();
+
+  if (PLACEHOLDER_LOCAL_PARTS.has(localPart)) {
+    return {
+      valid: false,
+      reason: "Please use your real email address instead of a test address.",
+    };
+  }
+
+  const firstDomainLabel = domain.split(".")[0] || "";
+  if (PLACEHOLDER_DOMAIN_LABELS.has(firstDomainLabel)) {
+    return {
+      valid: false,
+      reason: "Please use a real email domain.",
+    };
+  }
+
+  if (isLikelyProviderTypo(domain)) {
+    return {
+      valid: false,
+      reason: "That domain looks like a typo. Please double-check your email.",
+    };
+  }
 
   if (BLOCKED_DOMAINS.has(domain)) {
     return {
@@ -61,8 +110,11 @@ export async function validateEmailDomain(email) {
     }
 
     console.warn(
-      `[emailValidator] DNS lookup failed for domain=${domain} code=${error.code} - failing open`
+      `[emailValidator] DNS lookup failed for domain=${domain} code=${error.code} - failing closed`
     );
-    return { valid: true };
+    return {
+      valid: false,
+      reason: "Could not verify this email domain right now. Please try again.",
+    };
   }
 }

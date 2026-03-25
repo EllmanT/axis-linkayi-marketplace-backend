@@ -26,6 +26,28 @@ const requireTLS = !smtpSecure;
 
 const debugEnabled = process.env.EMAIL_DEBUG === "true";
 
+// #region agent log
+globalThis.fetch?.(
+  "http://127.0.0.1:7283/ingest/c90a40fd-4174-4597-871b-c10f05048932",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Debug-Session-Id": "83aa67",
+    },
+    body: JSON.stringify({
+      sessionId: "83aa67",
+      runId: "pre-fix",
+      hypothesisId: "H4",
+      location: "config/mailer.js",
+      message: "nodemailer_debug_enabled_state",
+      data: { debugEnabled },
+      timestamp: Date.now(),
+    }),
+  }
+).catch(() => {});
+// #endregion
+
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port,
