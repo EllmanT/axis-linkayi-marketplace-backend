@@ -75,6 +75,16 @@ function smtpForLogs() {
   return `smtp=${SMTP_HOST || "unknown"}:${SMTP_PORT || "unknown"} user=${userMasked}`;
 }
 
+function buildReferralLink(baseUrl, referralCode) {
+  const referralBaseUrl = (
+    WELCOME_REFERRAL_BASE_URL && WELCOME_REFERRAL_BASE_URL.trim()
+      ? WELCOME_REFERRAL_BASE_URL
+      : baseUrl
+  ).replace(/\/+$/, "");
+
+  return `${referralBaseUrl}?ref=${encodeURIComponent(referralCode)}`;
+}
+
 export async function sendWelcomeEmail({
   to,
   positionInQueue,
@@ -85,12 +95,7 @@ export async function sendWelcomeEmail({
   companyName,
   isEmployee,
 }) {
-  const referralBaseUrl = (
-    WELCOME_REFERRAL_BASE_URL && WELCOME_REFERRAL_BASE_URL.trim()
-      ? WELCOME_REFERRAL_BASE_URL
-      : baseUrl
-  ).replace(/\/+$/, "");
-  const referralLink = `${referralBaseUrl}?ref=${encodeURIComponent(referralCode)}`;
+  const referralLink = buildReferralLink(baseUrl, referralCode);
   const masked = maskEmail(to);
   const content = getPersonalizedContent(role);
   const isTopFifty = positionInQueue <= 50;
@@ -206,7 +211,7 @@ export async function sendReferralEmail({
   referralCode,
   baseUrl,
 }) {
-  const referralLink = `${baseUrl}?ref=${referralCode}`;
+  const referralLink = buildReferralLink(baseUrl, referralCode);
   const masked = maskEmail(to);
 
   console.log(
@@ -489,7 +494,7 @@ export async function sendUpdateConfirmationEmail({
   role,
   companyName,
 }) {
-  const referralLink = `${baseUrl}?ref=${referralCode}`;
+  const referralLink = buildReferralLink(baseUrl, referralCode);
   const masked = maskEmail(to);
 
   console.log(
